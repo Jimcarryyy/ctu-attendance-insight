@@ -8,12 +8,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Settings, Users, Shield, Activity, Server, Database, Clock, Calendar, UserCheck, UserX, Download, Plus, Edit, RotateCcw } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Settings, Users, Shield, Activity, Server, Database, Clock, Calendar, UserCheck, UserX, Download, Plus, Edit, RotateCcw, Save, FileText, AlertCircle, CheckCircle, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const AdminDashboard = ({ user, onLogout }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const { toast } = useToast();
+  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+  const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isDTRModalOpen, setIsDTRModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [newUser, setNewUser] = useState({
+    name: '',
+    email: '',
+    employeeId: '',
+    department: '',
+    role: 'Employee'
+  });
+
   const [settings, setSettings] = useState({
     facialRecognitionSensitivity: 'medium',
     dataRetentionDays: 365,
@@ -31,10 +46,10 @@ const AdminDashboard = ({ user, onLogout }) => {
   };
 
   const userRoles = [
-    { id: 1, name: 'Juan Dela Cruz', email: 'juan.delacruz@ctu.edu.ph', role: 'Employee', status: 'Active' },
-    { id: 2, name: 'Maria Santos', email: 'maria.santos@ctu.edu.ph', role: 'HR Staff', status: 'Active' },
-    { id: 3, name: 'Robert Garcia', email: 'robert.garcia@ctu.edu.ph', role: 'Admin', status: 'Active' },
-    { id: 4, name: 'Ana Reyes', email: 'ana.reyes@ctu.edu.ph', role: 'Employee', status: 'Inactive' },
+    { id: 1, name: 'Juan Dela Cruz', email: 'juan.delacruz@ctu.edu.ph', employeeId: 'EMP001', department: 'IT Services', role: 'Employee', status: 'Active' },
+    { id: 2, name: 'Maria Santos', email: 'maria.santos@ctu.edu.ph', employeeId: 'HR001', department: 'Human Resources', role: 'HR Staff', status: 'Active' },
+    { id: 3, name: 'Robert Garcia', email: 'robert.garcia@ctu.edu.ph', employeeId: 'ADM001', department: 'Administration', role: 'Admin', status: 'Active' },
+    { id: 4, name: 'Ana Reyes', email: 'ana.reyes@ctu.edu.ph', employeeId: 'EMP004', department: 'Marketing', role: 'Employee', status: 'Inactive' },
   ];
 
   const auditLogs = [
@@ -78,37 +93,26 @@ const AdminDashboard = ({ user, onLogout }) => {
   };
 
   const handleExportReport = () => {
-    toast({
-      title: "Export Started",
-      description: "Attendance report is being generated and will be downloaded shortly.",
-    });
+    setIsExportModalOpen(true);
   };
 
   const handleGenerateDTR = () => {
-    toast({
-      title: "DTR Generation",
-      description: "Daily Time Records are being generated for all employees.",
-    });
+    setIsDTRModalOpen(true);
   };
 
   const handleAddUser = () => {
-    toast({
-      title: "Add User",
-      description: "Opening user registration form...",
-    });
+    setIsAddUserModalOpen(true);
   };
 
-  const handleEditUser = (userName) => {
-    toast({
-      title: "Edit User",
-      description: `Opening edit form for ${userName}...`,
-    });
+  const handleEditUser = (user) => {
+    setSelectedUser(user);
+    setIsEditUserModalOpen(true);
   };
 
   const handleResetPassword = (userName) => {
     toast({
-      title: "Password Reset",
-      description: `Password reset email sent to ${userName}.`,
+      title: "Password Reset Sent",
+      description: `Password reset email has been sent to ${userName}.`,
     });
   };
 
@@ -130,6 +134,62 @@ const AdminDashboard = ({ user, onLogout }) => {
     toast({
       title: "Settings Reset",
       description: "All settings have been reset to default values.",
+    });
+  };
+
+  const handleConfirmExport = () => {
+    setIsExportModalOpen(false);
+    toast({
+      title: "Export Started",
+      description: "Attendance report is being generated and will be downloaded shortly.",
+    });
+  };
+
+  const handleConfirmDTR = () => {
+    setIsDTRModalOpen(false);
+    toast({
+      title: "DTR Generation Complete",
+      description: "Daily Time Records have been generated for all employees.",
+    });
+  };
+
+  const handleSaveNewUser = () => {
+    if (!newUser.name || !newUser.email || !newUser.employeeId) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsAddUserModalOpen(false);
+    toast({
+      title: "User Added",
+      description: `${newUser.name} has been successfully added to the system.`,
+    });
+    setNewUser({
+      name: '',
+      email: '',
+      employeeId: '',
+      department: '',
+      role: 'Employee'
+    });
+  };
+
+  const handleSaveEditUser = () => {
+    setIsEditUserModalOpen(false);
+    toast({
+      title: "User Updated",
+      description: `${selectedUser?.name}'s information has been updated successfully.`,
+    });
+    setSelectedUser(null);
+  };
+
+  const handleViewDetails = (user) => {
+    toast({
+      title: "User Details",
+      description: `Viewing detailed information for ${user.name}.`,
     });
   };
 
@@ -496,6 +556,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                             <div>
                               <div className="text-sm font-medium text-gray-900">{user.name}</div>
                               <div className="text-sm text-gray-500">{user.email}</div>
+                              <div className="text-xs text-gray-400">{user.employeeId}</div>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -513,7 +574,16 @@ const AdminDashboard = ({ user, onLogout }) => {
                               variant="ghost" 
                               size="sm" 
                               className="text-blue-600 hover:text-blue-800"
-                              onClick={() => handleEditUser(user.name)}
+                              onClick={() => handleViewDetails(user)}
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              View
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-green-600 hover:text-green-800 ml-1"
+                              onClick={() => handleEditUser(user)}
                             >
                               <Edit className="w-4 h-4 mr-1" />
                               Edit
@@ -521,11 +591,11 @@ const AdminDashboard = ({ user, onLogout }) => {
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="text-red-600 hover:text-red-800 ml-2"
+                              className="text-red-600 hover:text-red-800 ml-1"
                               onClick={() => handleResetPassword(user.name)}
                             >
                               <RotateCcw className="w-4 h-4 mr-1" />
-                              Reset Password
+                              Reset
                             </Button>
                           </td>
                         </tr>
@@ -637,6 +707,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                 className="bg-green-600 hover:bg-green-700 text-white"
                 onClick={handleSaveSettings}
               >
+                <Save className="w-4 h-4 mr-2" />
                 Save Changes
               </Button>
             </div>
@@ -695,6 +766,320 @@ const AdminDashboard = ({ user, onLogout }) => {
           </div>
         )}
       </div>
+
+      {/* Add User Modal */}
+      <Dialog open={isAddUserModalOpen} onOpenChange={setIsAddUserModalOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <Plus className="w-5 h-5 mr-2 text-green-600" />
+              Add New User
+            </DialogTitle>
+            <DialogDescription>
+              Create a new user account in the CampusCog system.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Full Name
+              </Label>
+              <Input
+                id="name"
+                value={newUser.name}
+                onChange={(e) => setNewUser(prev => ({ ...prev, name: e.target.value }))}
+                className="col-span-3"
+                placeholder="Enter full name"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="email" className="text-right">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                value={newUser.email}
+                onChange={(e) => setNewUser(prev => ({ ...prev, email: e.target.value }))}
+                className="col-span-3"
+                placeholder="user@ctu.edu.ph"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="employeeId" className="text-right">
+                Employee ID
+              </Label>
+              <Input
+                id="employeeId"
+                value={newUser.employeeId}
+                onChange={(e) => setNewUser(prev => ({ ...prev, employeeId: e.target.value }))}
+                className="col-span-3"
+                placeholder="EMP001"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="department" className="text-right">
+                Department
+              </Label>
+              <Select value={newUser.department} onValueChange={(value) => setNewUser(prev => ({ ...prev, department: value }))}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select department" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="IT Services">IT Services</SelectItem>
+                  <SelectItem value="Human Resources">Human Resources</SelectItem>
+                  <SelectItem value="Engineering">Engineering</SelectItem>
+                  <SelectItem value="Finance">Finance</SelectItem>
+                  <SelectItem value="Marketing">Marketing</SelectItem>
+                  <SelectItem value="Administration">Administration</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="role" className="text-right">
+                Role
+              </Label>
+              <Select value={newUser.role} onValueChange={(value) => setNewUser(prev => ({ ...prev, role: value }))}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Employee">Employee</SelectItem>
+                  <SelectItem value="HR Staff">HR Staff</SelectItem>
+                  <SelectItem value="Admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setIsAddUserModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveNewUser} className="bg-green-600 hover:bg-green-700 text-white">
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Create User
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit User Modal */}
+      <Dialog open={isEditUserModalOpen} onOpenChange={setIsEditUserModalOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <Edit className="w-5 h-5 mr-2 text-blue-600" />
+              Edit User: {selectedUser?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Update user information and role permissions.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="editName" className="text-right">
+                Full Name
+              </Label>
+              <Input
+                id="editName"
+                value={selectedUser?.name || ''}
+                className="col-span-3"
+                placeholder="Enter full name"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="editEmail" className="text-right">
+                Email
+              </Label>
+              <Input
+                id="editEmail"
+                type="email"
+                value={selectedUser?.email || ''}
+                className="col-span-3"
+                placeholder="user@ctu.edu.ph"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="editDepartment" className="text-right">
+                Department
+              </Label>
+              <Select value={selectedUser?.department || ''}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="IT Services">IT Services</SelectItem>
+                  <SelectItem value="Human Resources">Human Resources</SelectItem>
+                  <SelectItem value="Engineering">Engineering</SelectItem>
+                  <SelectItem value="Finance">Finance</SelectItem>
+                  <SelectItem value="Marketing">Marketing</SelectItem>
+                  <SelectItem value="Administration">Administration</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="editRole" className="text-right">
+                Role
+              </Label>
+              <Select value={selectedUser?.role || ''}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Employee">Employee</SelectItem>
+                  <SelectItem value="HR Staff">HR Staff</SelectItem>
+                  <SelectItem value="Admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="editStatus" className="text-right">
+                Status
+              </Label>
+              <Select value={selectedUser?.status || ''}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setIsEditUserModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEditUser} className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Save className="w-4 h-4 mr-2" />
+              Save Changes
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Report Modal */}
+      <Dialog open={isExportModalOpen} onOpenChange={setIsExportModalOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <Download className="w-5 h-5 mr-2 text-blue-600" />
+              Export Attendance Report
+            </DialogTitle>
+            <DialogDescription>
+              Choose the report format and date range for export.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="format" className="text-right">
+                Format
+              </Label>
+              <Select defaultValue="pdf">
+                <SelectTrigger className="col-span-3">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pdf">PDF Report</SelectItem>
+                  <SelectItem value="excel">Excel Spreadsheet</SelectItem>
+                  <SelectItem value="csv">CSV File</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="dateRange" className="text-right">
+                Date Range
+              </Label>
+              <Select defaultValue="today">
+                <SelectTrigger className="col-span-3">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="week">This Week</SelectItem>
+                  <SelectItem value="month">This Month</SelectItem>
+                  <SelectItem value="custom">Custom Range</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setIsExportModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmExport} className="bg-blue-600 hover:bg-blue-700 text-white">
+              <FileText className="w-4 h-4 mr-2" />
+              Export Report
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Generate DTR Modal */}
+      <Dialog open={isDTRModalOpen} onOpenChange={setIsDTRModalOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <FileText className="w-5 h-5 mr-2 text-green-600" />
+              Generate Daily Time Records
+            </DialogTitle>
+            <DialogDescription>
+              Generate DTR for all employees for the selected period.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="dtrPeriod" className="text-right">
+                Period
+              </Label>
+              <Select defaultValue="today">
+                <SelectTrigger className="col-span-3">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="week">This Week</SelectItem>
+                  <SelectItem value="month">This Month</SelectItem>
+                  <SelectItem value="payroll">Payroll Period</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="dtrDepartment" className="text-right">
+                Department
+              </Label>
+              <Select defaultValue="all">
+                <SelectTrigger className="col-span-3">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Departments</SelectItem>
+                  <SelectItem value="IT Services">IT Services</SelectItem>
+                  <SelectItem value="Human Resources">Human Resources</SelectItem>
+                  <SelectItem value="Engineering">Engineering</SelectItem>
+                  <SelectItem value="Finance">Finance</SelectItem>
+                  <SelectItem value="Marketing">Marketing</SelectItem>
+                  <SelectItem value="Administration">Administration</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center space-x-2 col-span-4">
+              <AlertCircle className="w-4 h-4 text-amber-500" />
+              <span className="text-sm text-gray-600">This will generate DTR for all selected employees.</span>
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setIsDTRModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmDTR} className="bg-green-600 hover:bg-green-700 text-white">
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Generate DTR
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
