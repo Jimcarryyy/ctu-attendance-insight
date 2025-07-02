@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Users, Shield, Activity, Server, Database } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Settings, Users, Shield, Activity, Server, Database, Clock, Calendar, UserCheck, UserX } from "lucide-react";
 
 const AdminDashboard = ({ user, onLogout }) => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -41,6 +41,31 @@ const AdminDashboard = ({ user, onLogout }) => {
     { id: 4, timestamp: '2025-07-02 08:30:08', user: 'ana.reyes@ctu.edu.ph', action: 'Leave Request', details: 'Submitted sick leave request' },
   ];
 
+  // Mock attendance data
+  const attendanceStats = {
+    totalPresent: 142,
+    totalAbsent: 28,
+    lateArrivals: 15,
+    earlyDepartures: 8
+  };
+
+  const todayAttendance = [
+    { id: 1, name: 'Juan Dela Cruz', employeeId: 'EMP001', department: 'IT Services', timeIn: '08:00 AM', timeOut: '-', status: 'Present', location: 'Main Campus' },
+    { id: 2, name: 'Maria Santos', employeeId: 'HR001', department: 'Human Resources', timeIn: '08:15 AM', timeOut: '-', status: 'Late', location: 'Main Campus' },
+    { id: 3, name: 'Carlos Mendoza', employeeId: 'EMP003', department: 'Engineering', timeIn: '07:45 AM', timeOut: '05:30 PM', status: 'Present', location: 'Main Campus' },
+    { id: 4, name: 'Ana Reyes', employeeId: 'EMP004', department: 'Marketing', timeIn: '-', timeOut: '-', status: 'Absent', location: '-' },
+    { id: 5, name: 'Luis Fernandez', employeeId: 'EMP005', department: 'Finance', timeIn: '08:30 AM', timeOut: '-', status: 'Late', location: 'Remote' },
+  ];
+
+  const departmentAttendance = [
+    { department: 'IT Services', present: 28, absent: 4, total: 32, rate: '87.5%' },
+    { department: 'Human Resources', present: 15, absent: 2, total: 17, rate: '88.2%' },
+    { department: 'Engineering', present: 45, absent: 8, total: 53, rate: '84.9%' },
+    { department: 'Finance', present: 22, absent: 3, total: 25, rate: '88.0%' },
+    { department: 'Marketing', present: 18, absent: 5, total: 23, rate: '78.3%' },
+    { department: 'Administration', present: 14, absent: 6, total: 20, rate: '70.0%' },
+  ];
+
   const handleSettingsChange = (key, value) => {
     setSettings(prev => ({ ...prev, [key]: value }));
   };
@@ -55,9 +80,14 @@ const AdminDashboard = ({ user, onLogout }) => {
   };
 
   const getStatusBadge = (status) => {
-    return status === 'Active' 
-      ? 'bg-green-100 text-green-800' 
-      : 'bg-gray-100 text-gray-800';
+    const styles = {
+      'Present': 'bg-green-100 text-green-800',
+      'Late': 'bg-yellow-100 text-yellow-800',
+      'Absent': 'bg-red-100 text-red-800',
+      'Active': 'bg-green-100 text-green-800',
+      'Inactive': 'bg-gray-100 text-gray-800'
+    };
+    return styles[status] || 'bg-gray-100 text-gray-800';
   };
 
   return (
@@ -90,6 +120,7 @@ const AdminDashboard = ({ user, onLogout }) => {
           <nav className="-mb-px flex space-x-8">
             {[
               { id: 'overview', name: 'Overview', icon: Activity },
+              { id: 'attendance', name: 'Attendance Overview', icon: Clock },
               { id: 'users', name: 'User Management', icon: Users },
               { id: 'settings', name: 'System Settings', icon: Settings },
               { id: 'audit', name: 'Audit Logs', icon: Database }
@@ -201,6 +232,153 @@ const AdminDashboard = ({ user, onLogout }) => {
                     </div>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Attendance Overview Tab */}
+        {activeTab === 'attendance' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">Attendance Overview</h2>
+              <div className="flex space-x-2">
+                <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-100">
+                  Export Report
+                </Button>
+                <Button className="bg-green-600 hover:bg-green-700 text-white">
+                  Generate DTR
+                </Button>
+              </div>
+            </div>
+
+            {/* Attendance Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Present Today</p>
+                      <p className="text-3xl font-bold text-green-600">{attendanceStats.totalPresent}</p>
+                    </div>
+                    <UserCheck className="w-8 h-8 text-green-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Absent Today</p>
+                      <p className="text-3xl font-bold text-red-600">{attendanceStats.totalAbsent}</p>
+                    </div>
+                    <UserX className="w-8 h-8 text-red-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Late Arrivals</p>
+                      <p className="text-3xl font-bold text-yellow-600">{attendanceStats.lateArrivals}</p>
+                    </div>
+                    <Clock className="w-8 h-8 text-yellow-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Early Departures</p>
+                      <p className="text-3xl font-bold text-orange-600">{attendanceStats.earlyDepartures}</p>
+                    </div>
+                    <Calendar className="w-8 h-8 text-orange-600" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Today's Attendance */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Today's Attendance</CardTitle>
+                <CardDescription>Real-time attendance tracking for July 2, 2025</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Employee</TableHead>
+                      <TableHead>Department</TableHead>
+                      <TableHead>Time In</TableHead>
+                      <TableHead>Time Out</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Location</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {todayAttendance.map((record) => (
+                      <TableRow key={record.id}>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium text-gray-900">{record.name}</div>
+                            <div className="text-sm text-gray-500">{record.employeeId}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-gray-600">{record.department}</TableCell>
+                        <TableCell className="text-gray-900">{record.timeIn}</TableCell>
+                        <TableCell className="text-gray-900">{record.timeOut}</TableCell>
+                        <TableCell>
+                          <Badge className={getStatusBadge(record.status)}>
+                            {record.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-gray-600">{record.location}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+
+            {/* Department Attendance Summary */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Department Attendance Summary</CardTitle>
+                <CardDescription>Attendance rates by department for today</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Department</TableHead>
+                      <TableHead>Present</TableHead>
+                      <TableHead>Absent</TableHead>
+                      <TableHead>Total</TableHead>
+                      <TableHead>Attendance Rate</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {departmentAttendance.map((dept, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-medium text-gray-900">{dept.department}</TableCell>
+                        <TableCell className="text-green-600 font-medium">{dept.present}</TableCell>
+                        <TableCell className="text-red-600 font-medium">{dept.absent}</TableCell>
+                        <TableCell className="text-gray-900">{dept.total}</TableCell>
+                        <TableCell>
+                          <Badge className={parseFloat(dept.rate) >= 85 ? 'bg-green-100 text-green-800' : parseFloat(dept.rate) >= 75 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}>
+                            {dept.rate}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
           </div>
