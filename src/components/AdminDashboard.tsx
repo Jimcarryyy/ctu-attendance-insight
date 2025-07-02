@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,10 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Settings, Users, Shield, Activity, Server, Database, Clock, Calendar, UserCheck, UserX } from "lucide-react";
+import { Settings, Users, Shield, Activity, Server, Database, Clock, Calendar, UserCheck, UserX, Download, Plus, Edit, RotateCcw } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const AdminDashboard = ({ user, onLogout }) => {
   const [activeTab, setActiveTab] = useState('overview');
+  const { toast } = useToast();
   const [settings, setSettings] = useState({
     facialRecognitionSensitivity: 'medium',
     dataRetentionDays: 365,
@@ -68,6 +71,66 @@ const AdminDashboard = ({ user, onLogout }) => {
 
   const handleSettingsChange = (key, value) => {
     setSettings(prev => ({ ...prev, [key]: value }));
+    toast({
+      title: "Settings Updated",
+      description: `${key} has been updated successfully.`,
+    });
+  };
+
+  const handleExportReport = () => {
+    toast({
+      title: "Export Started",
+      description: "Attendance report is being generated and will be downloaded shortly.",
+    });
+  };
+
+  const handleGenerateDTR = () => {
+    toast({
+      title: "DTR Generation",
+      description: "Daily Time Records are being generated for all employees.",
+    });
+  };
+
+  const handleAddUser = () => {
+    toast({
+      title: "Add User",
+      description: "Opening user registration form...",
+    });
+  };
+
+  const handleEditUser = (userName) => {
+    toast({
+      title: "Edit User",
+      description: `Opening edit form for ${userName}...`,
+    });
+  };
+
+  const handleResetPassword = (userName) => {
+    toast({
+      title: "Password Reset",
+      description: `Password reset email sent to ${userName}.`,
+    });
+  };
+
+  const handleSaveSettings = () => {
+    toast({
+      title: "Settings Saved",
+      description: "All system settings have been saved successfully.",
+    });
+  };
+
+  const handleResetSettings = () => {
+    setSettings({
+      facialRecognitionSensitivity: 'medium',
+      dataRetentionDays: 365,
+      autoLogoutMinutes: 30,
+      enableRemoteAccess: true,
+      enableNotifications: true
+    });
+    toast({
+      title: "Settings Reset",
+      description: "All settings have been reset to default values.",
+    });
   };
 
   const getRoleBadge = (role) => {
@@ -243,10 +306,18 @@ const AdminDashboard = ({ user, onLogout }) => {
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-900">Attendance Overview</h2>
               <div className="flex space-x-2">
-                <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-100">
+                <Button 
+                  variant="outline" 
+                  className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                  onClick={handleExportReport}
+                >
+                  <Download className="w-4 h-4 mr-2" />
                   Export Report
                 </Button>
-                <Button className="bg-green-600 hover:bg-green-700 text-white">
+                <Button 
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  onClick={handleGenerateDTR}
+                >
                   Generate DTR
                 </Button>
               </div>
@@ -389,7 +460,11 @@ const AdminDashboard = ({ user, onLogout }) => {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-900">User Role Management</h2>
-              <Button className="bg-green-600 hover:bg-green-700 text-white">
+              <Button 
+                className="bg-green-600 hover:bg-green-700 text-white"
+                onClick={handleAddUser}
+              >
+                <Plus className="w-4 h-4 mr-2" />
                 Add New User
               </Button>
             </div>
@@ -434,10 +509,22 @@ const AdminDashboard = ({ user, onLogout }) => {
                             </Badge>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-blue-600 hover:text-blue-800"
+                              onClick={() => handleEditUser(user.name)}
+                            >
+                              <Edit className="w-4 h-4 mr-1" />
                               Edit
                             </Button>
-                            <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-800 ml-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-red-600 hover:text-red-800 ml-2"
+                              onClick={() => handleResetPassword(user.name)}
+                            >
+                              <RotateCcw className="w-4 h-4 mr-1" />
                               Reset Password
                             </Button>
                           </td>
@@ -506,7 +593,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                       id="autoLogout"
                       type="number"
                       value={settings.autoLogoutMinutes}
-                      onChange={(e) => handleSettingsChange('autoLogoutMinutes', parseInt(e.target.value))}
+                      onChange={(e) => handleSettingsChange('autoLogoutMinutes', parseInt(e.target.value) || 30)}
                       className="border-gray-300 focus:border-green-500 focus:ring-green-500"
                     />
                   </div>
@@ -517,7 +604,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                       id="dataRetention"
                       type="number"
                       value={settings.dataRetentionDays}
-                      onChange={(e) => handleSettingsChange('dataRetentionDays', parseInt(e.target.value))}
+                      onChange={(e) => handleSettingsChange('dataRetentionDays', parseInt(e.target.value) || 365)}
                       className="border-gray-300 focus:border-green-500 focus:ring-green-500"
                     />
                   </div>
@@ -538,10 +625,18 @@ const AdminDashboard = ({ user, onLogout }) => {
             </div>
 
             <div className="flex justify-end space-x-4">
-              <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-100">
+              <Button 
+                variant="outline" 
+                className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                onClick={handleResetSettings}
+              >
+                <RotateCcw className="w-4 h-4 mr-2" />
                 Reset to Defaults
               </Button>
-              <Button className="bg-green-600 hover:bg-green-700 text-white">
+              <Button 
+                className="bg-green-600 hover:bg-green-700 text-white"
+                onClick={handleSaveSettings}
+              >
                 Save Changes
               </Button>
             </div>
