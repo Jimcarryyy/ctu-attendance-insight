@@ -9,11 +9,13 @@ import HRDashboard from '@/components/HRDashboard';
 import AdminDashboard from '@/components/AdminDashboard';
 import AboutPage from '@/components/AboutPage';
 import ContactPage from '@/components/ContactPage';
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [currentPage, setCurrentPage] = useState('home');
   const [showLogin, setShowLogin] = useState(false);
   const [user, setUser] = useState(null);
+  const { toast } = useToast();
 
   const handleLogin = (userData) => {
     setUser(userData);
@@ -31,6 +33,18 @@ const Index = () => {
   const handleLogout = () => {
     setUser(null);
     setCurrentPage('home');
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out.",
+    });
+  };
+
+  const handleNavigation = (page) => {
+    setCurrentPage(page);
+    toast({
+      title: "Navigation",
+      description: `Navigated to ${page.charAt(0).toUpperCase() + page.slice(1)} page`,
+    });
   };
 
   const renderPage = () => {
@@ -57,27 +71,39 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <div className="flex-shrink-0 flex items-center">
+              <div className="flex-shrink-0 flex items-center cursor-pointer" onClick={() => handleNavigation('home')}>
                 <Camera className="h-8 w-8 text-green-700" />
                 <span className="ml-2 text-2xl font-bold text-gray-900">CampusCog</span>
               </div>
             </div>
             <nav className="hidden md:flex space-x-8">
               <button
-                onClick={() => setCurrentPage('home')}
-                className="text-gray-700 hover:text-green-700 px-3 py-2 text-sm font-medium transition-colors"
+                onClick={() => handleNavigation('home')}
+                className={`px-3 py-2 text-sm font-medium transition-colors ${
+                  currentPage === 'home' 
+                    ? 'text-green-700 border-b-2 border-green-700' 
+                    : 'text-gray-700 hover:text-green-700'
+                }`}
               >
                 Home
               </button>
               <button
-                onClick={() => setCurrentPage('about')}
-                className="text-gray-700 hover:text-green-700 px-3 py-2 text-sm font-medium transition-colors"
+                onClick={() => handleNavigation('about')}
+                className={`px-3 py-2 text-sm font-medium transition-colors ${
+                  currentPage === 'about' 
+                    ? 'text-green-700 border-b-2 border-green-700' 
+                    : 'text-gray-700 hover:text-green-700'
+                }`}
               >
                 About
               </button>
               <button
-                onClick={() => setCurrentPage('contact')}
-                className="text-gray-700 hover:text-green-700 px-3 py-2 text-sm font-medium transition-colors"
+                onClick={() => handleNavigation('contact')}
+                className={`px-3 py-2 text-sm font-medium transition-colors ${
+                  currentPage === 'contact' 
+                    ? 'text-green-700 border-b-2 border-green-700' 
+                    : 'text-gray-700 hover:text-green-700'
+                }`}
               >
                 Contact
               </button>
@@ -142,7 +168,7 @@ const Index = () => {
                     Clock In/Out
                   </Button>
                   <Button
-                    onClick={() => setCurrentPage('about')}
+                    onClick={() => handleNavigation('about')}
                     variant="outline"
                     className="border-gray-300 text-gray-700 hover:bg-gray-100 px-8 py-3 text-lg"
                   >
@@ -165,7 +191,15 @@ const Index = () => {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="bg-white border-gray-200 hover:shadow-lg transition-shadow">
+            <Card 
+              className="bg-white border-gray-200 hover:shadow-lg transition-all cursor-pointer transform hover:scale-105"
+              onClick={() => {
+                toast({
+                  title: "Facial Recognition",
+                  description: "Secure biometric verification eliminates time theft and buddy punching",
+                });
+              }}
+            >
               <CardHeader>
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                   <Camera className="w-6 h-6 text-green-700" />
@@ -177,7 +211,15 @@ const Index = () => {
               </CardHeader>
             </Card>
 
-            <Card className="bg-white border-gray-200 hover:shadow-lg transition-shadow">
+            <Card 
+              className="bg-white border-gray-200 hover:shadow-lg transition-all cursor-pointer transform hover:scale-105"
+              onClick={() => {
+                toast({
+                  title: "Analytics Dashboard",
+                  description: "Real-time insights into attendance patterns and workforce analytics",
+                });
+              }}
+            >
               <CardHeader>
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                   <BarChart3 className="w-6 h-6 text-blue-600" />
@@ -189,7 +231,15 @@ const Index = () => {
               </CardHeader>
             </Card>
 
-            <Card className="bg-white border-gray-200 hover:shadow-lg transition-shadow">
+            <Card 
+              className="bg-white border-gray-200 hover:shadow-lg transition-all cursor-pointer transform hover:scale-105"
+              onClick={() => {
+                toast({
+                  title: "Automated DTR",
+                  description: "Automatic Daily Time Record generation for seamless payroll integration",
+                });
+              }}
+            >
               <CardHeader>
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                   <Clock className="w-6 h-6 text-green-700" />
@@ -201,7 +251,15 @@ const Index = () => {
               </CardHeader>
             </Card>
 
-            <Card className="bg-white border-gray-200 hover:shadow-lg transition-shadow">
+            <Card 
+              className="bg-white border-gray-200 hover:shadow-lg transition-all cursor-pointer transform hover:scale-105"
+              onClick={() => {
+                toast({
+                  title: "Leave Management",
+                  description: "Streamlined leave requests with automated approval workflows",
+                });
+              }}
+            >
               <CardHeader>
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                   <Calendar className="w-6 h-6 text-blue-600" />
@@ -213,7 +271,15 @@ const Index = () => {
               </CardHeader>
             </Card>
 
-            <Card className="bg-white border-gray-200 hover:shadow-lg transition-shadow">
+            <Card 
+              className="bg-white border-gray-200 hover:shadow-lg transition-all cursor-pointer transform hover:scale-105"
+              onClick={() => {
+                toast({
+                  title: "Role-Based Access",
+                  description: "Secure access control tailored for employees, HR staff, and administrators",
+                });
+              }}
+            >
               <CardHeader>
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                   <Shield className="w-6 h-6 text-green-700" />
@@ -225,7 +291,15 @@ const Index = () => {
               </CardHeader>
             </Card>
 
-            <Card className="bg-white border-gray-200 hover:shadow-lg transition-shadow">
+            <Card 
+              className="bg-white border-gray-200 hover:shadow-lg transition-all cursor-pointer transform hover:scale-105"
+              onClick={() => {
+                toast({
+                  title: "Cloud-Based",
+                  description: "Remote access support for hybrid work environments and real-time processing",
+                });
+              }}
+            >
               <CardHeader>
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                   <Users className="w-6 h-6 text-blue-600" />
@@ -258,7 +332,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
-              <div className="flex items-center mb-4">
+              <div className="flex items-center mb-4 cursor-pointer" onClick={() => handleNavigation('home')}>
                 <Camera className="h-8 w-8 text-green-400" />
                 <span className="ml-2 text-xl font-bold">CampusCog</span>
               </div>
@@ -271,7 +345,7 @@ const Index = () => {
               <ul className="space-y-2">
                 <li>
                   <button
-                    onClick={() => setCurrentPage('home')}
+                    onClick={() => handleNavigation('home')}
                     className="text-gray-300 hover:text-white transition-colors"
                   >
                     Home
@@ -279,7 +353,7 @@ const Index = () => {
                 </li>
                 <li>
                   <button
-                    onClick={() => setCurrentPage('about')}
+                    onClick={() => handleNavigation('about')}
                     className="text-gray-300 hover:text-white transition-colors"
                   >
                     About
@@ -287,7 +361,7 @@ const Index = () => {
                 </li>
                 <li>
                   <button
-                    onClick={() => setCurrentPage('contact')}
+                    onClick={() => handleNavigation('contact')}
                     className="text-gray-300 hover:text-white transition-colors"
                   >
                     Contact
@@ -297,11 +371,21 @@ const Index = () => {
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-4">Contact Info</h3>
-              <p className="text-gray-300">
-                Cebu Technological University<br />
-                Main Campus<br />
-                hr@ctu.edu.ph
-              </p>
+              <div className="text-gray-300 space-y-1">
+                <p>Cebu Technological University</p>
+                <p>Main Campus</p>
+                <button
+                  onClick={() => {
+                    toast({
+                      title: "Contact Information",
+                      description: "HR Email: hr@ctu.edu.ph",
+                    });
+                  }}
+                  className="text-green-400 hover:text-green-300 transition-colors"
+                >
+                  hr@ctu.edu.ph
+                </button>
+              </div>
             </div>
           </div>
           <div className="border-t border-gray-700 mt-8 pt-8 text-center">
