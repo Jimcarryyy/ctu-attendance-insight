@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +17,7 @@ const AdminDashboard = ({ user, onLogout }) => {
   const { toast } = useToast();
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
   const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
+  const [isViewUserModalOpen, setIsViewUserModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isDTRModalOpen, setIsDTRModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -187,10 +187,8 @@ const AdminDashboard = ({ user, onLogout }) => {
   };
 
   const handleViewDetails = (user) => {
-    toast({
-      title: "User Details",
-      description: `Viewing detailed information for ${user.name}.`,
-    });
+    setSelectedUser(user);
+    setIsViewUserModalOpen(true);
   };
 
   const getRoleBadge = (role) => {
@@ -1076,6 +1074,132 @@ const AdminDashboard = ({ user, onLogout }) => {
             <Button onClick={handleConfirmDTR} className="bg-green-600 hover:bg-green-700 text-white">
               <CheckCircle className="w-4 h-4 mr-2" />
               Generate DTR
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View User Details Modal */}
+      <Dialog open={isViewUserModalOpen} onOpenChange={setIsViewUserModalOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <Eye className="w-5 h-5 mr-2 text-blue-600" />
+              User Details: {selectedUser?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Detailed information for this user account.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-6 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium text-gray-600">Full Name</Label>
+                  <p className="text-lg font-semibold text-gray-900">{selectedUser?.name}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-600">Email Address</Label>
+                  <p className="text-gray-900">{selectedUser?.email}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-600">Employee ID</Label>
+                  <p className="text-gray-900 font-mono">{selectedUser?.employeeId}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-600">Department</Label>
+                  <p className="text-gray-900">{selectedUser?.department}</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium text-gray-600">Role</Label>
+                  <div className="mt-1">
+                    <Badge className={getRoleBadge(selectedUser?.role || '')}>
+                      {selectedUser?.role}
+                    </Badge>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-600">Status</Label>
+                  <div className="mt-1">
+                    <Badge className={getStatusBadge(selectedUser?.status || '')}>
+                      {selectedUser?.status}
+                    </Badge>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-600">Date Created</Label>
+                  <p className="text-gray-900">July 1, 2025</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-600">Last Login</Label>
+                  <p className="text-gray-900">July 2, 2025 - 09:15 AM</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="border-t pt-4">
+              <Label className="text-sm font-medium text-gray-600">Recent Activity</Label>
+              <div className="mt-2 space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-600">Last Clock In</span>
+                  <span className="text-gray-900">Today, 08:00 AM</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-600">Attendance Rate (This Month)</span>
+                  <span className="text-green-600 font-medium">95.5%</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-600">Total Leave Days Used</span>
+                  <span className="text-gray-900">3 out of 15</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t pt-4">
+              <Label className="text-sm font-medium text-gray-600">Permissions & Access</Label>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                  <span className="text-sm text-gray-700">Facial Recognition Access</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                  <span className="text-sm text-gray-700">Mobile App Access</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  {selectedUser?.role === 'Admin' ? (
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 text-gray-400" />
+                  )}
+                  <span className="text-sm text-gray-700">Admin Dashboard</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  {selectedUser?.role === 'HR Staff' || selectedUser?.role === 'Admin' ? (
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 text-gray-400" />
+                  )}
+                  <span className="text-sm text-gray-700">HR Features</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setIsViewUserModalOpen(false)}>
+              Close
+            </Button>
+            <Button 
+              onClick={() => {
+                setIsViewUserModalOpen(false);
+                handleEditUser(selectedUser);
+              }} 
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Edit User
             </Button>
           </div>
         </DialogContent>
