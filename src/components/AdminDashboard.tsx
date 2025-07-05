@@ -8,8 +8,9 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Settings, Users, Shield, Activity, Server, Database, Clock, Calendar, UserCheck, UserX, Download, Plus, Edit, RotateCcw, Save, FileText, AlertCircle, CheckCircle, Eye } from "lucide-react";
+import { Settings, Users, Shield, Activity, Server, Database, Clock, Calendar, UserCheck, UserX, Download, Plus, Edit, RotateCcw, Save, FileText, AlertCircle, CheckCircle, Eye, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const AdminDashboard = ({ user, onLogout }) => {
@@ -107,6 +108,14 @@ const AdminDashboard = ({ user, onLogout }) => {
   const handleEditUser = (user) => {
     setSelectedUser(user);
     setIsEditUserModalOpen(true);
+  };
+
+  const handleDeleteUser = (userName) => {
+    toast({
+      title: "User Deleted",
+      description: `${userName} has been successfully removed from the system.`,
+      variant: "destructive"
+    });
   };
 
   const handleResetPassword = (userName) => {
@@ -589,12 +598,47 @@ const AdminDashboard = ({ user, onLogout }) => {
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="text-red-600 hover:text-red-800 ml-1"
+                              className="text-orange-600 hover:text-orange-800 ml-1"
                               onClick={() => handleResetPassword(user.name)}
                             >
                               <RotateCcw className="w-4 h-4 mr-1" />
                               Reset
                             </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="text-red-600 hover:text-red-800 ml-1"
+                                >
+                                  <Trash2 className="w-4 h-4 mr-1" />
+                                  Delete
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle className="flex items-center">
+                                    <AlertCircle className="w-5 h-5 mr-2 text-red-600" />
+                                    Delete User Account
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete <strong>{user.name}</strong>'s account? 
+                                    This action cannot be undone and will permanently remove all user data, 
+                                    attendance records, and access permissions.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction 
+                                    onClick={() => handleDeleteUser(user.name)}
+                                    className="bg-red-600 hover:bg-red-700 text-white"
+                                  >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Delete User
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </td>
                         </tr>
                       ))}
