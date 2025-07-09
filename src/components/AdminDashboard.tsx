@@ -21,6 +21,14 @@ const AdminDashboard = ({ user, onLogout }) => {
   const [userToDelete, setUserToDelete] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showReports, setShowReports] = useState(false);
+  
+  // New modal states
+  const [showBackupModal, setShowBackupModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [showSecurityModal, setShowSecurityModal] = useState(false);
+  const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const [selectedBackup, setSelectedBackup] = useState(null);
+  const [isCreatingBackup, setIsCreatingBackup] = useState(false);
 
   // Mock data
   const [usersData, setUsersData] = useState([
@@ -92,6 +100,47 @@ const AdminDashboard = ({ user, onLogout }) => {
     toast({
       title: "User Created",
       description: "New user has been created successfully.",
+    });
+  };
+
+  // New backup and security functions
+  const handleCreateBackup = () => {
+    setIsCreatingBackup(true);
+    setShowBackupModal(true);
+    
+    // Simulate backup creation
+    setTimeout(() => {
+      setIsCreatingBackup(false);
+      setShowBackupModal(false);
+      toast({
+        title: "Backup Created",
+        description: "Manual backup has been created successfully.",
+      });
+    }, 3000);
+  };
+
+  const handleScheduleBackup = () => {
+    setShowScheduleModal(false);
+    toast({
+      title: "Backup Scheduled",
+      description: "Automatic backup has been scheduled successfully.",
+    });
+  };
+
+  const handleViewSecurityReport = () => {
+    setShowSecurityModal(true);
+  };
+
+  const handleRestoreBackup = (backup) => {
+    setSelectedBackup(backup);
+    setShowRestoreModal(true);
+  };
+
+  const confirmRestore = () => {
+    setShowRestoreModal(false);
+    toast({
+      title: "Restore Initiated",
+      description: `Restoring from backup: ${selectedBackup?.date}`,
     });
   };
 
@@ -426,11 +475,11 @@ const AdminDashboard = ({ user, onLogout }) => {
                     <CheckCircle className="w-8 h-8 text-green-600" />
                   </div>
                   <div className="space-y-2">
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                    <Button onClick={handleCreateBackup} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                       <Download className="w-4 h-4 mr-2" />
                       Create Manual Backup
                     </Button>
-                    <Button variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-100">
+                    <Button onClick={() => setShowScheduleModal(true)} variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-100">
                       <Clock className="w-4 h-4 mr-2" />
                       Schedule Automatic Backup
                     </Button>
@@ -477,7 +526,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                       </div>
                     </div>
                   </div>
-                  <Button variant="outline" className="w-full border-red-300 text-red-700 hover:bg-red-50">
+                  <Button onClick={handleViewSecurityReport} variant="outline" className="w-full border-red-300 text-red-700 hover:bg-red-50">
                     <AlertTriangle className="w-4 h-4 mr-2" />
                     View Security Report
                   </Button>
@@ -508,7 +557,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                           <Download className="w-4 h-4 mr-1" />
                           Download
                         </Button>
-                        <Button size="sm" variant="outline" className="border-green-300 text-green-700 hover:bg-green-50">
+                        <Button onClick={() => handleRestoreBackup(backup)} size="sm" variant="outline" className="border-green-300 text-green-700 hover:bg-green-50">
                           <RefreshCw className="w-4 h-4 mr-1" />
                           Restore
                         </Button>
@@ -547,7 +596,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                 Role
               </Label>
               <Select>
-                <SelectTrigger className="col-span-3">
+                <SelectTrigger className="col-span-3" data-testid="role-select">
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent>
@@ -572,7 +621,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                 Status
               </Label>
               <Select>
-                <SelectTrigger className="col-span-3">
+                <SelectTrigger className="col-span-3" data-testid="status-select">
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -629,6 +678,177 @@ const AdminDashboard = ({ user, onLogout }) => {
           <AlertDialogFooter>
             <AlertDialogCancel onClick={handleCancelDelete}>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteUser} className="bg-red-600 hover:bg-red-700 text-white">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Backup Creation Modal */}
+      <Dialog open={showBackupModal} onOpenChange={setShowBackupModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Creating Backup</DialogTitle>
+            <DialogDescription>
+              Please wait while we create a manual backup of your system data.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center justify-center py-8">
+            {isCreatingBackup ? (
+              <div className="flex items-center space-x-3">
+                <RefreshCw className="w-6 h-6 animate-spin text-blue-600" />
+                <span className="text-gray-600">Creating backup...</span>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-3">
+                <CheckCircle className="w-6 h-6 text-green-600" />
+                <span className="text-gray-600">Backup completed!</span>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Backup Modal */}
+      <Dialog open={showScheduleModal} onOpenChange={setShowScheduleModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Schedule Automatic Backup</DialogTitle>
+            <DialogDescription>
+              Configure automatic backup settings for your system.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="frequency" className="text-right">
+                Frequency
+              </Label>
+              <Select>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select frequency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="daily">Daily</SelectItem>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="time" className="text-right">
+                Time
+              </Label>
+              <Input
+                id="time"
+                type="time"
+                defaultValue="03:00"
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="retention" className="text-right">
+                Retention
+              </Label>
+              <Select>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select retention period" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">7 days</SelectItem>
+                  <SelectItem value="30">30 days</SelectItem>
+                  <SelectItem value="90">90 days</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowScheduleModal(false)} variant="secondary">
+              Cancel
+            </Button>
+            <Button onClick={handleScheduleBackup} type="submit">
+              Schedule Backup
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Security Report Modal */}
+      <Dialog open={showSecurityModal} onOpenChange={setShowSecurityModal}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Security Report</DialogTitle>
+            <DialogDescription>
+              Detailed security analysis and recommendations for your system.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <span className="font-medium text-green-800">Security Score: A</span>
+                </div>
+                <p className="text-sm text-green-600 mt-1">Excellent security posture</p>
+              </div>
+              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <AlertCircle className="w-5 h-5 text-yellow-600" />
+                  <span className="font-medium text-yellow-800">3 Failed Logins</span>
+                </div>
+                <p className="text-sm text-yellow-600 mt-1">Monitor suspicious activity</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <h4 className="font-medium text-gray-900">Security Checks</h4>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                  <span className="text-sm">SSL/TLS Configuration</span>
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                  <span className="text-sm">Password Policy Compliance</span>
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                  <span className="text-sm">Two-Factor Authentication</span>
+                  <XCircle className="w-4 h-4 text-red-600" />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                  <span className="text-sm">Data Encryption</span>
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowSecurityModal(false)} variant="secondary">
+              Close
+            </Button>
+            <Button onClick={() => {
+              setShowSecurityModal(false);
+              toast({
+                title: "Security Report",
+                description: "Full security report has been downloaded.",
+              });
+            }}>
+              Download Full Report
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Restore Backup Modal */}
+      <AlertDialog open={showRestoreModal} onOpenChange={setShowRestoreModal}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Restore from Backup</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to restore from backup "{selectedBackup?.date}"? This action will overwrite current data and cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowRestoreModal(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRestore} className="bg-green-600 hover:bg-green-700 text-white">
+              Restore Backup
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
