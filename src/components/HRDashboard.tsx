@@ -1,11 +1,10 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Users, Clock, Calendar, BarChart3, Search, CheckCircle, XCircle, Download } from "lucide-react";
+import { Users, Clock, Calendar, BarChart3, Search, CheckCircle, XCircle, Download, Filter } from "lucide-react";
 
 const HRDashboard = ({ user, onLogout }) => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -47,10 +46,28 @@ const HRDashboard = ({ user, onLogout }) => {
     { id: 3, employee: 'Miguel Rodriguez', type: 'Personal', dates: 'Jul 8, 2025', status: 'Pending' },
   ];
 
+  // Attendance tracking data
+  const attendanceRecords = [
+    { id: 1, name: 'Juan Dela Cruz', employeeId: 'EMP001', department: 'Computer Science', date: '2025-07-09', timeIn: '7:58 AM', timeOut: '5:05 PM', status: 'Present', hoursWorked: '9h 7m' },
+    { id: 2, name: 'Maria Santos', employeeId: 'EMP002', department: 'Engineering', date: '2025-07-09', timeIn: '8:15 AM', timeOut: '5:30 PM', status: 'Late', hoursWorked: '9h 15m' },
+    { id: 3, name: 'Robert Garcia', employeeId: 'EMP003', department: 'Business', date: '2025-07-09', timeIn: '8:00 AM', timeOut: '5:00 PM', status: 'Present', hoursWorked: '9h 0m' },
+    { id: 4, name: 'Ana Reyes', employeeId: 'EMP004', department: 'Arts & Sciences', date: '2025-07-09', timeIn: '-', timeOut: '-', status: 'On Leave', hoursWorked: '-' },
+    { id: 5, name: 'Carlos Mendoza', employeeId: 'EMP005', department: 'Computer Science', date: '2025-07-09', timeIn: '-', timeOut: '-', status: 'Absent', hoursWorked: '-' },
+    { id: 6, name: 'Lisa Torres', employeeId: 'EMP006', department: 'Engineering', date: '2025-07-09', timeIn: '7:45 AM', timeOut: '4:45 PM', status: 'Present', hoursWorked: '9h 0m' },
+    { id: 7, name: 'Miguel Rodriguez', employeeId: 'EMP007', department: 'Business', date: '2025-07-09', timeIn: '8:30 AM', timeOut: '5:30 PM', status: 'Late', hoursWorked: '9h 0m' },
+    { id: 8, name: 'Sofia Martinez', employeeId: 'EMP008', department: 'Arts & Sciences', date: '2025-07-09', timeIn: '8:10 AM', timeOut: '5:10 PM', status: 'Late', hoursWorked: '9h 0m' },
+  ];
+
   const filteredEmployees = employees.filter(employee =>
     employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     employee.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
     employee.department.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredAttendanceRecords = attendanceRecords.filter(record =>
+    record.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    record.employeeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    record.department.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleLeaveAction = (requestId, action) => {
@@ -284,6 +301,152 @@ const HRDashboard = ({ user, onLogout }) => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {employee.timeIn}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Attendance Tab */}
+        {activeTab === 'attendance' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">Attendance Tracking</h2>
+              <div className="flex space-x-2">
+                <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-100">
+                  <Filter className="w-4 h-4 mr-2" />
+                  Filter
+                </Button>
+                <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-100">
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Attendance
+                </Button>
+              </div>
+            </div>
+
+            {/* Daily Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Present Today</p>
+                      <p className="text-3xl font-bold text-green-600">{attendanceStats.present}</p>
+                    </div>
+                    <CheckCircle className="w-8 h-8 text-green-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Late Arrivals</p>
+                      <p className="text-3xl font-bold text-yellow-600">{attendanceStats.late}</p>
+                    </div>
+                    <Clock className="w-8 h-8 text-yellow-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Absent</p>
+                      <p className="text-3xl font-bold text-red-600">{attendanceStats.absent}</p>
+                    </div>
+                    <XCircle className="w-8 h-8 text-red-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">On Leave</p>
+                      <p className="text-3xl font-bold text-blue-600">{attendanceStats.onLeave}</p>
+                    </div>
+                    <Calendar className="w-8 h-8 text-blue-600" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search attendance records..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 border-gray-300 focus:border-green-500 focus:ring-green-500"
+              />
+            </div>
+
+            {/* Attendance Records Table */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Daily Attendance Records</CardTitle>
+                <CardDescription>July 9, 2025 - Real-time attendance tracking</CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Employee
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Department
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Time In
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Time Out
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Hours Worked
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Status
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredAttendanceRecords.map((record) => (
+                        <tr key={record.id}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">{record.name}</div>
+                              <div className="text-sm text-gray-500">{record.employeeId}</div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {record.department}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {record.timeIn}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {record.timeOut}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {record.hoursWorked}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <Badge className={getStatusBadge(record.status)}>
+                              {record.status}
+                            </Badge>
                           </td>
                         </tr>
                       ))}
