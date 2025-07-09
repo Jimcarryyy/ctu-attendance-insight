@@ -587,10 +587,15 @@ const AdminDashboard = ({ user, onLogout }) => {
               Cancel
             </Button>
             <Button onClick={() => {
-              const name = document.getElementById('name').value;
-              const role = document.getElementById('role').value;
-              const department = document.getElementById('department').value;
-              const status = document.getElementById('status').value;
+              const nameInput = document.getElementById('name') as HTMLInputElement;
+              const roleSelect = document.querySelector('[data-testid="role-select"]') as HTMLSelectElement;
+              const departmentInput = document.getElementById('department') as HTMLInputElement;
+              const statusSelect = document.querySelector('[data-testid="status-select"]') as HTMLSelectElement;
+
+              const name = nameInput?.value || '';
+              const role = roleSelect?.value || 'employee';
+              const department = departmentInput?.value || '';
+              const status = statusSelect?.value || 'active';
 
               const updatedUser = {
                 id: selectedUser ? selectedUser.id : `USER${Math.floor(Math.random() * 1000)}`,
